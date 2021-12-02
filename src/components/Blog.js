@@ -1,16 +1,16 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react'
 import blogService from '../services/blogs'
+import { useSelector } from 'react-redux'
 
-const Blog = ({ blog, currentUserName }) => {
+const Blog = ({ blog }) => {
   const [showAll, setShowAll] = useState(false)
   const [likesState, setLikesState] = useState(blog.likes)
   const [blogDeleted, setBlogDeleted] = useState(false)
-  console.log('blog:', blog)
-  let showRemove
-  if (currentUserName) {
-    if (blog.user.username)
-      showRemove = (currentUserName === blog.user.username)
-  }
+
+  let showRemove =
+  (useSelector(state => state.signedUser).username === blog.user.username)
+
 
   const blogStyle = {
     paddingTop: 4,
@@ -58,7 +58,7 @@ const Blog = ({ blog, currentUserName }) => {
         <div>{blog.url}</div>
         <div>likes {likesState} <button onClick={like}>like</button></div>
         <div>{blog.author}</div>
-        <div>{showRemove === true && removeButton()}</div>
+        {<div>{showRemove === true && removeButton()}</div>}
       </div>
     )
   else return (

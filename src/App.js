@@ -1,37 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
+import Users from './components/Users'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import { useSelector, useDispatch } from 'react-redux'
 import { showMessage, removeMessage } from './reducers/notificationReducer'
+import { initializeBlogs, newBlog } from './reducers/blogsReducer'
+import { signUser, unSignUser } from './reducers/signedUserReducer'
+import { initializeUsers } from './reducers/usersReducer'
+import {
+  BrowserRouter as Router,
+  Switch, Route
+} from 'react-router-dom'
 
-const Notification = () => {
-  const notification = useSelector(state => state)
-  if (useSelector(state => state) === '') return <div></div>
-  return (
-    <div className={notification.reason}>
-      {notification.text}
-    </div>
-  )
-}
+
 const App = () => {
   const dispatch = useDispatch()
 
-  const [blogs, setBlogs] = useState([])
+
+  const blogs = useSelector(state => state.blogs)
+  const user = useSelector(state => state.signedUser)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  let currentUserName
-  if (user) currentUserName = user.username
+
+
   const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
+    dispatch(initializeBlogs())
+    dispatch(initializeUsers())
   }, [])
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const App = () => {
     if (loggedUserJSON) {
       const userX = JSON.parse(loggedUserJSON)
       blogService.setToken(userX.token)
-      setUser(userX)
+      dispatch(signUser(userX))
     }
   }, [])
 
@@ -49,7 +50,7 @@ const App = () => {
       const userX = await loginService.login({ username, password })
       window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(userX))
       blogService.setToken(userX.token)
-      setUser(userX)
+      dispatch(signUser(userX))
       setUsername('')
       setPassword('')
     } catch (exception) {
@@ -61,26 +62,14 @@ const App = () => {
   }
   const handleLogOut = () => {
     window.localStorage.clear()
-    setUser(null)
+    dispatch(unSignUser())
   }
   const addBlog = async (blogObject) => {
-    try {
-      console.log(blogObject)
-      const blogX = await blogService.create(blogObject)
-      console.log('blogX', blogX)
-      blogFormRef.current.toggleVisibility()
-      dispatch(showMessage({ text: `a new blog ${blogX.title} by ${blogX.author} added`, reason: 'success' }))
-      setTimeout(() => {
-        dispatch(removeMessage())
-      }, 5000)
-      setBlogs(blogs.concat(blogX))
 
-    } catch (exception) {
-      dispatch(showMessage({ text: `${exception.errorMessage}`, reason: 'error' }))
-      setTimeout(() => {
-        dispatch(removeMessage())
-      }, 5000)
-    }
+    dispatch(newBlog(blogObject))
+    blogFormRef.current.toggleVisibility()
+
+
 
   }
 
@@ -92,7 +81,7 @@ const App = () => {
         <BlogForm addBlog={addBlog} />
       </Togglable>
       {blogs.sort((first, second) => second.likes - first.likes).map(blog =>
-        <Blog key={blog.id} blog={blog} currentUserName={currentUserName} />
+        <Blog key={blog.id} blog={blog} />
       )}
     </div>
   )
@@ -113,12 +102,19 @@ const App = () => {
     </form>
   )
   return (
-    <div>
-      <h2>blogs</h2>
-      <Notification />
-      {user === null && loginForm()}
-      {user !== null && logged()}
-    </div>
+    <Router>
+      <Switch>
+        <Route path='/users'>
+          <Users />
+        </Route>
+        <Route path='/'>
+          <h2>blogs</h2>
+          <Notification />
+          {user === null && loginForm()}
+          {user !== null && logged()}
+        </Route>
+      </Switch>
+    </Router>
   )
 }
 

@@ -1,5 +1,5 @@
 const notificationReducer = (state = '', action) => {
-  console.log(action.type)
+
   if (action.type === 'SHOW') return action.data
   if (action.type === 'HIDE') return ''
   return state
