@@ -73,10 +73,8 @@ const App = () => {
 
   }
 
-  const logged = () => (
+  const loggedBlogs = () => (
     <div>
-      {user.name} logged in
-      <button onClick={handleLogOut}> log out </button>
       <Togglable buttonLabel='create blog' ref={blogFormRef}>
         <BlogForm addBlog={addBlog} />
       </Togglable>
@@ -85,6 +83,14 @@ const App = () => {
       )}
     </div>
   )
+  const logged = () => {
+    return (
+      <div>
+        <div>{user.name} logged in </div>
+        <div><button onClick={handleLogOut}> log out </button> </div>
+      </div>
+    )
+  }
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -103,17 +109,21 @@ const App = () => {
   )
   return (
     <Router>
-      <Switch>
-        <Route path='/users'>
-          <Users />
-        </Route>
-        <Route path='/'>
-          <h2>blogs</h2>
-          <Notification />
-          {user === null && loginForm()}
-          {user !== null && logged()}
-        </Route>
-      </Switch>
+      <div className='container'>
+        <h2>blogs</h2>
+        {user !== null && logged()}
+        {user === null && loginForm()}
+        <Switch>
+          <Route path='/users'>
+            {user !== null && <Users />}
+          </Route>
+          <Route path='/'>
+
+            <Notification />
+            {user !== null && loggedBlogs()}
+          </Route>
+        </Switch>
+      </div>
     </Router>
   )
 }
