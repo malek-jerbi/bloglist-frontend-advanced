@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import blogService from '../services/blogs'
 import { useSelector } from 'react-redux'
+import { Button } from 'react-bootstrap'
 
 const Blog = ({ blog }) => {
   const [showAll, setShowAll] = useState(false)
@@ -9,7 +10,7 @@ const Blog = ({ blog }) => {
   const [blogDeleted, setBlogDeleted] = useState(false)
 
   let showRemove =
-  (useSelector(state => state.signedUser).username === blog.user.username)
+    (useSelector(state => state.signedUser).username === blog.user.username)
 
 
   const blogStyle = {
@@ -33,7 +34,7 @@ const Blog = ({ blog }) => {
   }
 
   const removeButton = () => (
-    <button style={buttonStyle} onClick={deleteBlog}>remove</button>
+    <Button variant='danger' onClick={deleteBlog}>remove</Button>
   )
 
   const like = async () => {
@@ -49,24 +50,24 @@ const Blog = ({ blog }) => {
   if (blogDeleted) return (<div>deleted.</div>)
   if (showAll)
     return (
-      <div style={blogStyle} className="blog">
+      <div style={blogStyle} className="block-example border border-dark">
         <div>{blog.title}
-          <button onClick={() => setShowAll(!showAll)}>
+          <Button variant='info' onClick={() => setShowAll(!showAll)}>
             {showAll ? 'hide' : 'view'}
-          </button>
+          </Button>
         </div>
         <div>{blog.url}</div>
-        <div>likes {likesState} <button onClick={like}>like</button></div>
+        <div>likes {likesState} <Button variant='dark' onClick={like}>like</Button></div>
         <div>{blog.author}</div>
         {<div>{showRemove === true && removeButton()}</div>}
       </div>
     )
   else return (
-    <div style={blogStyle} className="blog">
-      <div>{blog.title} {blog.author}
-        <button onClick={() => setShowAll(!showAll)}>
+    <div style={blogStyle} className="block-example border border-dark">
+      <div>{blog.title} -{blog.author}
+        <Button variant='info' onClick={() => setShowAll(!showAll)}>
           {showAll ? 'hide' : 'view'}
-        </button>
+        </Button>
       </div>
 
     </div>

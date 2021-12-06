@@ -6,6 +6,8 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
+import { Form } from 'react-bootstrap'
+import { Button, Nav, Navbar } from 'react-bootstrap'
 import { useSelector, useDispatch } from 'react-redux'
 import { showMessage, removeMessage } from './reducers/notificationReducer'
 import { initializeBlogs, newBlog } from './reducers/blogsReducer'
@@ -13,8 +15,9 @@ import { signUser, unSignUser } from './reducers/signedUserReducer'
 import { initializeUsers } from './reducers/usersReducer'
 import {
   BrowserRouter as Router,
-  Switch, Route
+  Switch, Route, Link,
 } from 'react-router-dom'
+
 
 
 const App = () => {
@@ -44,6 +47,10 @@ const App = () => {
     }
   }, [])
 
+  const padding = {
+    padding: 5
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -54,7 +61,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      dispatch(showMessage({ text: 'wrong username or password', reason: 'error' }))
+      dispatch(showMessage({ text: 'wrong username or password', reason: 'danger' }))
       setTimeout(() => {
         dispatch(removeMessage())
       }, 5000)
@@ -73,53 +80,92 @@ const App = () => {
 
   }
 
-  const loggedBlogs = () => (
-    <div>
-      <Togglable buttonLabel='create blog' ref={blogFormRef}>
-        <BlogForm addBlog={addBlog} />
-      </Togglable>
-      {blogs.sort((first, second) => second.likes - first.likes).map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
-    </div>
-  )
-  const logged = () => {
+  const loggedBlogs = () => {
+    const padding = {
+      paddingTop: 10
+    }
     return (
-      <div>
+      <div style={padding}>
+        <Togglable buttonLabel='create blog' ref={blogFormRef}>
+          <BlogForm addBlog={addBlog} />
+        </Togglable>
+
+        {blogs.sort((first, second) => second.likes - first.likes).map(blog =>
+
+          <Blog key={blog.id} blog={blog} />
+
+        )}
+
+      </div>
+    )
+  }
+  const logged = () => {
+    const padding = {
+      paddingBottom: 10
+    }
+    return (
+      <div style={padding}>
         <div>{user.name} logged in </div>
-        <div><button onClick={handleLogOut}> log out </button> </div>
+        <div><Button variant='danger' onClick={handleLogOut}> log out </Button> </div>
       </div>
     )
   }
   const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input type="text" value={username} name='Username'
-          onChange={({ target }) => setUsername(target.value)} />
-      </div>
-      <div>
-        password
-        <input type="password" value={password} name='Password'
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
+    <div>
+      <Form onSubmit={handleLogin}>
+        <Form.Group>
+          <div>
+            <Form.Label>username:</Form.Label>
+            <Form.Control
+              type="text"
+              name="username"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </div>
+          <div>
+            <Form.Label>password:</Form.Label>
+            <Form.Control
+              type="password"
+              name='Password'
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </div>
+          <Button variant="primary" type="submit">
+            login
+          </Button>
+        </Form.Group>
+      </Form>
+    </div>
   )
   return (
     <Router>
+      <div>
+        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
+            <Nav className="mr-auto">
+              <Nav.Link href="#" as="span">
+                <Link style={padding} to="/">home</Link>
+              </Nav.Link>
+              <Nav.Link href="#" as="span">
+                <Link style={padding} to="/users">users</Link>
+              </Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
+      </div>
       <div className='container'>
         <h2>blogs</h2>
         {user !== null && logged()}
+        <Notification />
         {user === null && loginForm()}
         <Switch>
           <Route path='/users'>
             {user !== null && <Users />}
           </Route>
           <Route path='/'>
-
-            <Notification />
             {user !== null && loggedBlogs()}
           </Route>
         </Switch>

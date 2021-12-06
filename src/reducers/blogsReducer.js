@@ -32,7 +32,7 @@ export const newBlog = (newBlog) => {
       }, 5000)
     }
     catch (error) {
-      dispatch(showMessage({ text: `${error.response.data.error}`, reason: 'error' }))
+      dispatch(showMessage({ text: `${error.response.data.error}`, reason: 'danger' }))
       setTimeout(() => {
         dispatch(removeMessage())
       }, 5000)
